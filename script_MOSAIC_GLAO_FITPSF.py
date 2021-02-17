@@ -18,7 +18,7 @@ from maoppy.psfmodel import psffit, Psfao, Moffat
 from maoppy.instrument import mosaic
 
 #%% GRAB INI FILE
-parfile = '/home/omartin/Projects/MOSAIC/AOsimulations/CODES/MosaicGLAOParams_onaxis_multiwvl.ini'
+parfile = '/home/omartin/Projects/MOSAIC/AOsimulations/CODES/MAOLYSES/MosaicGLAOParams_onaxis_multiwvl.ini'
 parser = ConfigParser()
 parser.optionxform = str
 parser.read(parfile)
@@ -57,7 +57,7 @@ EE300_all   = np.zeros((nCases,nProf,nWvl,3))
 xMoff       = np.zeros((nCases,nProf,nWvl,4))
 xFet        = np.zeros((nCases,nProf,nWvl,7))
 
-for k in range(nCases):
+for k in range(1):
     # UPDATING THE CONFIGURATION
     aoConfig = aoConfig_all[k]   
     
@@ -93,7 +93,7 @@ for k in range(nCases):
     if aoConfig == 'MOAO_good': # THE NGS ARE LOCATED AT 1' FROM ON-AXIS
         #add of  NGS 
         nbNGS= 4
-        fovNGS = 1 # in arcmin
+        fovNGS = 2.5 # in arcmin
         if nbNGS !=0 :
             for istar in range(nbNGS) :
                 GuideStarZenith.append(fovNGS*60/2)
@@ -136,7 +136,7 @@ for k in range(nCases):
     # UPDATE .INI FILE
     parser.set('GUIDESTARS_HO','GuideStarZenith_HO',str(GuideStarZenith))
     parser.set('GUIDESTARS_HO','GuideStarAzimuth_HO',str(GuideStarAz))
-    parser.set('SENSOR_HO','loopGain',str(loopGain))
+    parser.set('SENSOR_HO','loopGain_HO',str(loopGain))
     parser.set('DM','OptimizationZenith',str(optimRad))
     parser.set('DM','OptimizationAzimuth',str(optimAz))
     parser.set('DM','OptimizationWeight',str(optim))
@@ -188,10 +188,13 @@ for k in range(nCases):
             parser.write(configfile)
         
         # PSF SIMULATIONS
-        fao = fourierModel(parfile,calcPSF=True,verbose=False,display=False,getErrorBreakDown=False,getFWHM=False,getEncircledEnergy=True,getEnsquaredEnergy=False, displayContour=False) 
+        fao = fourierModel(parfile,calcPSF=True,verbose=False,display=False,getErrorBreakDown=False,getFWHM=False,getEncircledEnergy=False,getEnsquaredEnergy=False, displayContour=False) 
         
         # CONCATENATING PSF
-        psfSimu[k,i] = np.transpose(fao.PSF[:,:,0,:],axes=(2,0,1))
+        if aoConfig == 'NOAO':
+            psfSimu[k,i] = np.transpose(fao.PSF,axes=(2,0,1))
+        else:
+            psfSimu[k,i] = np.transpose(fao.PSF[:,:,0,:],axes=(2,0,1))
         
         # FITTING + GRABBING FWHM and EE IN 300 MAS BOX
         for l in range(nWvl):
@@ -249,6 +252,9 @@ hdul= fits.HDUList([hdu1, hdu2, hdu3])
 hdul.writeto(path_save+'wvl_FWHM_EE300mas_on-axis_NOAO_GLAO_MOAO_5profiles_6wvl.fits')
 
 #%% DISPLAYING RESULTS
+
+
+
 plt.close('all')
 mpl.rcParams['font.size'] = 22
 usetex = True
@@ -260,22 +266,23 @@ plt.rcParams.update({
     
 # FWHM vs wvl - Median conditions
 plt.figure()
-plt.plot(wvl*1e6,FWHM_all[0,-1,:,0],'b',label='NOAO')
-plt.plot(wvl*1e6,FWHM_all[1,-1,:,0],'r',label='GLAO')
-plt.plot(wvl*1e6,FWHM_all[2,-1,:,0],'g',label='MOAO')
-#plt.plot(wvl*1e6,206264.8*1e3*wvl/39,'k--',label='Diffraction')
+plt.plot(wvl*1e6,FWHM_all[0,-1,:,0],'bs--',label='NOAO')
+plt.plot(wvl*1e6,FWHM_all[1,-1,:,0],'rs--',label='GLAO')
+plt.plot(wvl*1e6,FWHM_all[2,-1,:,0],'gs--',label='MOAO poor')
+plt.plot(wvl*1e6,FWHM_all[3,-1,:,0],'ks--',label='MOAO good')
+plt.plot(wvl*1e6,1e3*0.987*wvl*1e6/(r0z*(wvl/500e-9)**1.2)/4.85,'k--',label='Seeing')
+plt.plot(wvl*1e6,206264.8*1e3*wvl/39,'b--',label='Diffraction')
 plt.xlabel('Wavelength [$\mu$m]')
 plt.ylabel('FWHM [mas]')
 plt.legend()
 
 # FWHM vs profile - Median conditions
 plt.figure()
-plt.plot(wvl*1e6,FWHM_all[0,0,:,0],label='JQ1')
-plt.plot(wvl*1e6,FWHM_all[0,1,:,0],label='JQ2')
-plt.plot(wvl*1e6,FWHM_all[0,2,:,0],label='JQ3')
-plt.plot(wvl*1e6,FWHM_all[0,3,:,0],label='JQ4')
-plt.plot(wvl*1e6,FWHM_all[0,4,:,0],label='Median')
-#plt.plot(wvl*1e6,206264.8*1e3*wvl/39,'k--',label='Diffraction')
+plt.plot(wvl*1e6,FWHM_all[0,0,:,0],'bs--',label='JQ1')
+plt.plot(wvl*1e6,FWHM_all[0,1,:,0],'rs--',label='JQ2')
+plt.plot(wvl*1e6,FWHM_all[0,2,:,0],'gs--',label='JQ3')
+plt.plot(wvl*1e6,FWHM_all[0,3,:,0],'ms--',label='JQ4')
+plt.plot(wvl*1e6,FWHM_all[0,4,:,0],'ks--',label='Median')
 plt.xlabel('Wavelength [$\mu$m]')
 plt.ylabel('NOAO FWHM [mas]')
 plt.legend()
