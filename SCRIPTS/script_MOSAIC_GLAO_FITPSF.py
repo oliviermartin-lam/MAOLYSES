@@ -12,19 +12,24 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from astropy.io import fits
 from configparser import ConfigParser
+
 from aoSystem.fourierModel import fourierModel
 import aoSystem.FourierUtils as FourierUtils
+#from psfFitting.psfFitting import psfFitting
 from maoppy.psfmodel import psffit, Psfao, Moffat
 from maoppy.instrument import mosaic
-
+#%% PATHS
+parfile = '/home/omartin/Projects/MOSAIC/AOsimulations/MAOLYSES/INI/MosaicGLAOParams_dev.ini'
+pathCn2 = '/home/omartin/Projects/MOSAIC/AOsimulations/MAOLYSES/DATA/'
+fileCn2 = 'profil_turbulent_eso.fits'
 #%% GRAB INI FILE
-parfile = '/home/omartin/Projects/MOSAIC/AOsimulations/MAOLYSES/INI/MosaicGLAOParams_onaxis_multiwvl.ini'
+
 parser = ConfigParser()
 parser.optionxform = str
 parser.read(parfile)
+
 #%% OBSERVING CONDITIONS
-pathCn2 =  '/home/omartin/Projects/MOSAIC/AOsimulations/MAOLYSES/DATA/'
-fileCn2 ='profil_turbulent_eso.fits'
+
 
 C          = fits.open(pathCn2+fileCn2)
 Cn2        = C[0].data
@@ -42,10 +47,10 @@ nProf      = len(nameProf)
 aoConfig_all = ['NOAO' , 'GLAO' , 'MOAO_poor' , 'MOAO_good']
 nCases = len(aoConfig_all)
 # instantiating outputs
-nPup = 100
+nPup = 512
 nPsf = 2 * nPup
-parser.set('telescope','resolution',str(nPup))
-parser.set('PSF_DIRECTIONS','psf_FoV',str(nPsf))
+parser.set('telescope','Resolution',str(nPup))
+parser.set('sensor_science','FiedOfView',str(nPsf))
 with open(parfile, 'w') as configfile:
             parser.write(configfile)
             
@@ -130,21 +135,17 @@ for k in range(1):
                     optimAz.append(b)
                     optim.append(1)
                     
-    technical_FoV = 1.5*LGSFoV            
-    
-        
     # UPDATE .INI FILE
-    parser.set('GUIDESTARS_HO','GuideStarZenith_HO',str(GuideStarZenith))
-    parser.set('GUIDESTARS_HO','GuideStarAzimuth_HO',str(GuideStarAz))
-    parser.set('SENSOR_HO','loopGain_HO',str(loopGain))
+    parser.set('sources_HO','Zenith',str(GuideStarZenith))
+    parser.set('sources_HO','Azimuth',str(GuideStarAz))
+    parser.set('RTC','LoopGain_HO',str(loopGain))
     parser.set('DM','OptimizationZenith',str(optimRad))
     parser.set('DM','OptimizationAzimuth',str(optimAz))
     parser.set('DM','OptimizationWeight',str(optim))
     parser.set('atmosphere','L0',str(L0))
-    parser.set('PSF_DIRECTIONS','technical_FoV',str(technical_FoV))
     
     
-    for i  in range(nProf):
+    for i  in range(1):
     
         # UPDATING THE ATMOSPHERE
         name = nameProf[i]
@@ -178,23 +179,25 @@ for k in range(1):
          
          
         # UPDATE .INI FILE
-        parser.set('telescope','zenithAngle',str(zenithAngle))
+        parser.set('telescope','ZenithAngle',str(zenithAngle))
         parser.set('atmosphere','Cn2Weights',str(Cn2Weights))
         parser.set('atmosphere','Cn2Heights',str(Cn2Heights))
-        parser.set('atmosphere','wSpeed',str(wSpeed))
-        parser.set('atmosphere','wDir',str(wDir))
-        parser.set('atmosphere','seeing',str(seeing))  
+        parser.set('atmosphere','WindSpeed',str(wSpeed))
+        parser.set('atmosphere','WindDirection',str(wDir))
+        parser.set('atmosphere','Seeing',str(seeing))  
         with open(parfile, 'w') as configfile:
             parser.write(configfile)
         
         # PSF SIMULATIONS
-        fao = fourierModel(parfile,calcPSF=True,verbose=False,display=False,getErrorBreakDown=False,getFWHM=False,getEncircledEnergy=False,getEnsquaredEnergy=False, displayContour=False) 
+        fao = fourierModel(parfile,calcPSF=True,verbose=False,display=False,\
+                           getErrorBreakDown=False,getFWHM=False,getEncircledEnergy=False,\
+                           getEnsquaredEnergy=False, displayContour=False,nyquistSampling=True) 
         
         # CONCATENATING PSF
         psfSimu[k,i] = np.transpose(fao.PSF[:,:,0,:],axes=(2,0,1))
         
         # FITTING + GRABBING FWHM and EE IN 300 MAS BOX
-        for l in range(nWvl):
+        for l in range(1):
             # param
             psInMas = 206264.8*1e3*wvl[l]/39/2
             nntrue = 300/psInMas/2
@@ -202,6 +205,7 @@ for k in range(1):
             # Moffat fitting
             sx = 1e3*seeing* (wvl[l]/0.5e-6)**(-1/6)/psInMas/2
             x0  = [sx,sx,0,3]
+            #res = psfFitting(psfSimu[k,i,l],psfao,x0,fixed=(False,False,False,False,False,False,False,True,True,True,False,False,False,True))
             res = psffit(psfSimu[k,i,l],Moffat,x0,flux_bck=(True,False),fixed=(False,False,False,False))
             psfMoff[k,i,l] = res.psf/res.psf.sum()
             xMoff[k,i,l] = res.x
