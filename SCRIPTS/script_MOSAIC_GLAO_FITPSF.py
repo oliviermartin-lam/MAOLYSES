@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from astropy.io import fits
 from configparser import ConfigParser
-from fourierModel import fourierModel
-import FourierUtils as FourierUtils
+from aoSystem.fourierModel import fourierModel
+import aoSystem.FourierUtils as FourierUtils
 from maoppy.psfmodel import psffit, Psfao, Moffat
 from maoppy.instrument import mosaic
 
