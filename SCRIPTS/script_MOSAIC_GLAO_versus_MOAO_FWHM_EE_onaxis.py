@@ -19,7 +19,7 @@ from aoSystem.fourierModel import fourierModel
 parfile = '/home/omartin/Projects/MOSAIC/AOsimulations/MAOLYSES/INI/MosaicGLAOParams_dev.ini'
 pathCn2 = '/home/omartin/Projects/MOSAIC/AOsimulations/MAOLYSES/DATA/'
 fileCn2 = 'profil_turbulent_eso.fits'
-path_save = '/home/omartin/Projects/MOSAIC/AOsimulations/RESULTS/FIT/'
+path_save = '/home/omartin/Projects/MOSAIC/AOsimulations/RESULTS/GLAO_versus_MOAO/'
 
 parser = ConfigParser()
 parser.optionxform = str
