@@ -10,33 +10,35 @@ Created on Tue May  4 14:45:01 2021
 import numpy as np
 from aoSystem.fourierModel import fourierModel
 
-
 #%% MANAGING PATHS
 path_maolyses = '/home/omartin/Projects/MOSAIC/AOsimulations/MAOLYSES'
 path_p3       = '/home/omartin/Projects/P3'
 
 #%% ON-AXIS CASE - SINGLE WAVELENGTH
 
-path_ini = path_maolyses + '/INI/MosaicGLAOParams_onaxis_singlewvl.ini'
-fao = fourierModel(path_ini, path_root = path_p3,\
-                   nyquistSampling=True,display=False,verbose=True,\
+path_ini = path_maolyses + '/INI/templates/MosaicGLAOParams_onaxis_singlewvl.ini'
+fao = fourierModel(path_ini, path_root = path_p3,nyquistSampling=True,\
+                   display=False,verbose=True,\
                    getErrorBreakDown=False,getFWHM=True,getEncircledEnergy=True)
 
 FWHM = np.mean(fao.FWHM[:,0,0],axis=0)
 EE  = fao.EncE[:,0,0]
 #%% ON-AXIS CASE - MULTI WAVELENGTH
 
-path_ini = path_maolyses + '/INI/MosaicGLAOParams_onaxis_multiwvl.ini'
+path_ini = path_maolyses + '/INI/templates/MosaicGLAOParams_onaxis_multiwvl.ini'
 fao = fourierModel(path_ini, path_root = path_p3,\
                    nyquistSampling=True,display=False,verbose=True,\
                    getErrorBreakDown=False,getFWHM=True,getEncircledEnergy=True)
 
 FWHM = np.squeeze(fao.FWHM).mean(axis=0)
-EE  = np.squeeze(fao.EncE[:,:,0])
+psInMas = 206264.8*1e3*fao.freq.wvl/fao.ao.tel.D/2
+nntrue = 300/psInMas/2
+nn2    = nntrue.astype(int)
+EE  = np.squeeze(fao.EncE[nn2,0,0])
 
 #%% OFF-AXIS CASE - SINGLE WAVELENGTH
 
-path_ini = path_maolyses + '/INI/MosaicGLAOParams_grid_singlewvl.ini'
+path_ini = path_maolyses + '/INI/templates/MosaicGLAOParams_grid_singlewvl.ini'
 fao = fourierModel(path_ini, path_root = path_p3,\
                    nyquistSampling=True,display=False,verbose=True,\
                    getErrorBreakDown=False,getFWHM=True,getEncircledEnergy=True)
@@ -46,7 +48,7 @@ EE  = np.squeeze(fao.EncE[:,:,0])
 
 #%% OFF-AXIS CASE - MULTI WAVELENGTH
 
-path_ini = path_maolyses + '/INI/MosaicGLAOParams_grid_multiwvl.ini'
+path_ini = path_maolyses + '/INI/templates/MosaicGLAOParams_grid_multiwvl.ini'
 fao = fourierModel(path_ini, path_root = path_p3,\
                    nyquistSampling=True,display=False,verbose=True,\
                    getErrorBreakDown=False,getFWHM=True,getEncircledEnergy=True)
