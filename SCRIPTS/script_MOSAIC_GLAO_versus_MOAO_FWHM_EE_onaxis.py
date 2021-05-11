@@ -140,9 +140,9 @@ for k in range(nCases):
                         b = 90
                 else :  
                     b  = 180*np.arctan2(optimX[i],optimY[j])/np.pi
-                    optimRad.append(a)
-                    optimAz.append(b)
-                    optim.append(1)
+                optimRad.append(a)
+                optimAz.append(b)
+                optim.append(1)
                     
     # UPDATE .INI FILE
     parser.set('sources_HO','Zenith',str(GuideStarZenith))
