@@ -31,7 +31,7 @@ Cn2        = C[0].data
 h          = Cn2[:,1]
 v          = Cn2[:,2]
 vDir       = Cn2[:,8]*180/np.pi
-L0         = 50
+L0         = 25
 nameProf   = ['JQ1','JQ2','JQ3','JQ4','Median']
 ZenithProf = np.array([30, 30, 30, 45, 30])
 wvl        = np.array([500e-09, 640e-09, 890e-9, 1.2e-06, 1.65e-06, 2.17e-06])
@@ -120,10 +120,12 @@ for k in range(nCases):
         NumberLenslets = [64,64,64,64,64,64,64,64]
         SizeLenslets   = [0.6,0.6,0.6,0.6,0.6,0.6,0.6,0.6]
         NumberPhotons  = [500,500,500,500,500,500,500,500] 
+        nRec           = 9
     else : # WE OPTIMIZE in THE FOV
         NumberLenslets = [64,64,64,64]
         SizeLenslets   = [0.6,0.6,0.6,0.6]
         NumberPhotons  = [500,500,500,500] 
+        nRec           = 1
         
         OptimFoV     = 5*60 #arcsec
         nopt         = 5 #nb point lineaire pour l'optim (au total nopt²) 
@@ -151,6 +153,7 @@ for k in range(nCases):
     parser.set('DM','OptimizationZenith',str(optimRad))
     parser.set('DM','OptimizationAzimuth',str(optimAz))
     parser.set('DM','OptimizationWeight',str(optim))
+    parser.set('DM','NumberReconstructedLayers',str(nRec))
     parser.set('sensor_HO','NumberPhotons',str(NumberPhotons))
     parser.set('sensor_HO','SizeLenslets',str(SizeLenslets))
     parser.set('sensor_HO','NumberLenslets',str(NumberLenslets))
@@ -222,14 +225,14 @@ if path_save != '':
     # PSF simu 
     hdu = fits.PrimaryHDU(psfSimu)
     hdul= fits.HDUList(hdu)
-    hdul.writeto(path_save+'PSFsimu_on-axis_NOAO_GLAO_MOAOpoor_MOAOgood_5profiles_6wvl.fits')
+    hdul.writeto(path_save+'PSFsimu_on-axis_NOAO_GLAO_MOAOpoor_MOAOgood_5profiles_6wvl.fits',overwrite=True)
     
     # FWHM/EE 
     hdu1 = fits.PrimaryHDU(wvl)
     hdu2 = fits.ImageHDU(FWHM_all)
     hdu3 = fits.ImageHDU(EE400_all)
     hdul= fits.HDUList([hdu1, hdu2, hdu3])
-    hdul.writeto(path_save+'wvl_FWHM_EE400mas_on-axis_NOAO_GLAO_MOAOpoor_MOAOgood_5profiles_6wvl.fits')
+    hdul.writeto(path_save+'wvl_FWHM_EE400mas_on-axis_NOAO_GLAO_MOAOpoor_MOAOgood_5profiles_6wvl.fits',overwrite=True)
         
 #%% DISPLAYING RESULTS
 
