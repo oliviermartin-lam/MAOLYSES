@@ -18,6 +18,7 @@ Created on Wed Jun  2 08:36:24 2021
 # No additionnal residual jitter (can be changed in the .ini file)
 # The wind speed.wind directions are obtained from ESO 35-layers profiles. The wind speed is then mean-rescaled to the average wind speed from the Scidar 
 # 4 cases: NOAO, GLAO, MOAO with 5'-diameter NGS constellation of 3 stars MOAO 2.5'- 3 NGS
+# The pupil resolution is 128 pixels by default, can be changed
 #%% Import librairies
 import numpy as np
 import matplotlib.pyplot as plt
@@ -229,16 +230,16 @@ for k in range(nCases):
 
 tsimu = time.time() - t0
 #%% SAVING RESULTS
-#if path_save != '':
-#    if savePSF:
-#        # PSF simu 
-#        hdu = fits.PrimaryHDU(psfSimu)
-#        hdul= fits.HDUList(hdu)
-#        hdul.writeto(path_save+'PSFsimu_on-axis_NOAO_GLAO_MOAOpoor_MOAOgood_scidar.fits',overwrite=True)
-#    
-#    # FWHM/EE 
-#    hdu1 = fits.PrimaryHDU(wvl)
-#    hdu2 = fits.ImageHDU(FWHM_all)
-#    hdu3 = fits.ImageHDU(EE400_all)
-#    hdul= fits.HDUList([hdu1, hdu2, hdu3])
-#    hdul.writeto(path_save+'wvl_FWHM_EE400mas_on-axis_NOAO_GLAO_MOAOpoor_MOAOgood_scidar.fits',overwrite=True)
+if path_save != '':
+    if savePSF:
+        # PSF simu 
+        hdu = fits.PrimaryHDU(psfSimu)
+        hdul= fits.HDUList(hdu)
+        hdul.writeto(path_save+'PSFsimu_on-axis_NOAO_GLAO_MOAOpoor_MOAOgood_scidar.fits',overwrite=True)
+    
+    # FWHM/EE 
+    hdu1 = fits.PrimaryHDU(wvl)
+    hdu2 = fits.ImageHDU(FWHM_all)
+    hdu3 = fits.ImageHDU(EE400_all)
+    hdul= fits.HDUList([hdu1, hdu2, hdu3])
+    hdul.writeto(path_save+'wvl_FWHM_EE400mas_on-axis_NOAO_GLAO_MOAOpoor_MOAOgood_scidar.fits',overwrite=True)
